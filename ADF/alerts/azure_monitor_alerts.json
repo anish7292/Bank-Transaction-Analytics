@@ -1,0 +1,18 @@
+{
+  "alerts": [
+    {
+      "name": "adf-pipeline-failure-alert",
+      "signal": "PipelineFailedRuns",
+      "threshold": 1,
+      "windowMinutes": 5,
+      "severity": "Sev2"
+    },
+    {
+      "name": "adf-activity-duration-alert",
+      "signal": "ActivityFailedRuns",
+      "threshold": 3,
+      "windowMinutes": 15,
+      "severity": "Sev3"
+    }
+  ]
+}

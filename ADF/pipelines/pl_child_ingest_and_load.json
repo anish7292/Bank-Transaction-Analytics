@@ -1,0 +1,74 @@
+{
+  "name": "pl_child_ingest_and_load",
+  "properties": {
+    "parameters": {
+      "p_SourcePath": {"type": "String"},
+      "p_TargetTable": {"type": "String"},
+      "p_BatchId": {"type": "String"},
+      "p_LoadType": {"type": "String"},
+      "p_WatermarkValue": {"type": "String", "defaultValue": "1900-01-01"}
+    },
+    "activities": [
+      {
+        "name": "CopyRawToStaging",
+        "type": "Copy",
+        "policy": {"retry": 3, "retryIntervalInSeconds": 45, "timeout": "00:30:00"},
+        "typeProperties": {
+          "source": {"type": "DelimitedTextSource"},
+          "sink": {"type": "SqlSink", "writeBatchSize": 10000, "sqlWriterUseTableLock": true}
+        },
+        "userProperties": [
+          {"name": "LoadType", "value": "@pipeline().parameters.p_LoadType"},
+          {"name": "Watermark", "value": "@pipeline().parameters.p_WatermarkValue"}
+        ]
+      },
+      {
+        "name": "RunValidationProc",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [{"activity": "CopyRawToStaging", "dependencyConditions": ["Succeeded"]}],
+        "typeProperties": {
+          "storedProcedureName": "stg.usp_validate_stage_transactions",
+          "storedProcedureParameters": {
+            "BatchId": {"value": "@pipeline().parameters.p_BatchId", "type": "String"}
+          }
+        }
+      },
+      {
+        "name": "RunTransformProc",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [{"activity": "RunValidationProc", "dependencyConditions": ["Succeeded"]}],
+        "typeProperties": {
+          "storedProcedureName": "dw.usp_transform_and_load_dw",
+          "storedProcedureParameters": {
+            "BatchId": {"value": "@pipeline().parameters.p_BatchId", "type": "String"}
+          }
+        }
+      },
+      {
+        "name": "RunAuditLogProc",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [{"activity": "RunTransformProc", "dependencyConditions": ["Succeeded", "Failed"]}],
+        "typeProperties": {
+          "storedProcedureName": "audit.usp_log_pipeline_run",
+          "storedProcedureParameters": {
+            "BatchId": {"value": "@pipeline().parameters.p_BatchId", "type": "String"},
+            "Status": {"value": "@activity('RunTransformProc').Status", "type": "String"}
+          }
+        }
+      }
+      ,
+      {
+        "name": "UpdateWatermark",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [{"activity": "RunTransformProc", "dependencyConditions": ["Succeeded"]}],
+        "typeProperties": {
+          "storedProcedureName": "ctl.usp_update_watermark",
+          "storedProcedureParameters": {
+            "BatchId": {"value": "@pipeline().parameters.p_BatchId", "type": "String"},
+            "SourcePath": {"value": "@pipeline().parameters.p_SourcePath", "type": "String"}
+          }
+        }
+      }
+    ]
+  }
+}

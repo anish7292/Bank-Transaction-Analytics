@@ -1,0 +1,23 @@
+{
+  "name": "trg_bank_ingestion_daily",
+  "properties": {
+    "type": "ScheduleTrigger",
+    "typeProperties": {
+      "recurrence": {
+        "frequency": "Day",
+        "interval": 1,
+        "startTime": "2026-01-01T00:30:00Z",
+        "timeZone": "UTC"
+      }
+    },
+    "pipelines": [
+      {
+        "pipelineReference": {"referenceName": "pl_master_bank_ingestion", "type": "PipelineReference"},
+        "parameters": {
+          "p_ExecutionDate": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+          "p_LoadType": "INCREMENTAL"
+        }
+      }
+    ]
+  }
+}

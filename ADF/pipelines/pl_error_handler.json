@@ -1,0 +1,24 @@
+{
+  "name": "pl_error_handler",
+  "properties": {
+    "parameters": {
+      "p_PipelineName": {"type": "String"},
+      "p_ErrorMessage": {"type": "String"},
+      "p_BatchId": {"type": "String"}
+    },
+    "activities": [
+      {
+        "name": "LogPipelineError",
+        "type": "SqlServerStoredProcedure",
+        "typeProperties": {
+          "storedProcedureName": "audit.usp_log_pipeline_error",
+          "storedProcedureParameters": {
+            "PipelineName": {"value": "@pipeline().parameters.p_PipelineName", "type": "String"},
+            "BatchId": {"value": "@pipeline().parameters.p_BatchId", "type": "String"},
+            "ErrorMessage": {"value": "@pipeline().parameters.p_ErrorMessage", "type": "String"}
+          }
+        }
+      }
+    ]
+  }
+}

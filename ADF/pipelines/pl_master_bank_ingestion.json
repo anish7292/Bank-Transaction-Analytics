@@ -1,0 +1,71 @@
+{
+  "name": "pl_master_bank_ingestion",
+  "properties": {
+    "parameters": {
+      "p_ExecutionDate": {"type": "String"},
+      "p_LoadType": {"type": "String", "defaultValue": "INCREMENTAL"},
+      "p_CorrelationId": {"type": "String", "defaultValue": "@{guid()}"}
+    },
+    "variables": {
+      "v_BatchId": {"type": "String"},
+      "v_FilePattern": {"type": "String", "defaultValue": "bank_txn_*.csv"}
+    },
+    "activities": [
+      {
+        "name": "SetBatchId",
+        "type": "SetVariable",
+        "typeProperties": {"variableName": "v_BatchId", "value": "@guid()"}
+      },
+      {
+        "name": "InitializeBatchControl",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [{"activity": "SetBatchId", "dependencyConditions": ["Succeeded"]}],
+        "typeProperties": {
+          "storedProcedureName": "audit.usp_log_pipeline_run",
+          "storedProcedureParameters": {
+            "BatchId": {"value": "@variables('v_BatchId')", "type": "String"},
+            "Status": {"value": "STARTED", "type": "String"},
+            "PipelineName": {"value": "pl_master_bank_ingestion", "type": "String"},
+            "CorrelationId": {"value": "@pipeline().parameters.p_CorrelationId", "type": "String"}
+          }
+        }
+      },
+      {
+        "name": "LookupIngestionMetadata",
+        "type": "Lookup",
+        "dependsOn": [{"activity": "InitializeBatchControl", "dependencyConditions": ["Succeeded"]}],
+        "policy": {"retry": 3, "retryIntervalInSeconds": 30},
+        "typeProperties": {"query": "SELECT * FROM ctl.IngestionMetadata WHERE IsActive = 1"}
+      },
+      {
+        "name": "ForEachMetadataRow",
+        "type": "ForEach",
+        "dependsOn": [{"activity": "LookupIngestionMetadata", "dependencyConditions": ["Succeeded"]}],
+        "typeProperties": {
+          "items": "@activity('LookupIngestionMetadata').output.value",
+          "activities": [
+            {
+              "name": "ExecuteChildPipeline",
+              "type": "ExecutePipeline",
+              "typeProperties": {
+                "pipeline": {"referenceName": "pl_child_ingest_and_load", "type": "PipelineReference"},
+                "parameters": {
+                  "p_SourcePath": "@item().SourcePath",
+                  "p_TargetTable": "@item().TargetTable",
+                  "p_BatchId": "@variables('v_BatchId')",
+                  "p_LoadType": "@pipeline().parameters.p_LoadType"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "OnFailureRoute",
+        "type": "ExecutePipeline",
+        "dependsOn": [{"activity": "ForEachMetadataRow", "dependencyConditions": ["Failed"]}],
+        "typeProperties": {"pipeline": {"referenceName": "pl_error_handler", "type": "PipelineReference"}}
+      }
+    ]
+  }
+}

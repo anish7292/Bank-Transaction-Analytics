@@ -1,0 +1,14 @@
+{
+  "name": "ls_adls_mi",
+  "properties": {
+    "type": "AzureBlobFS",
+    "typeProperties": {
+      "url": "https://<adls_account>.dfs.core.windows.net"
+    },
+    "connectVia": {
+      "referenceName": "AutoResolveIntegrationRuntime",
+      "type": "IntegrationRuntimeReference"
+    },
+    "annotations": ["ManagedIdentityAuth"]
+  }
+}

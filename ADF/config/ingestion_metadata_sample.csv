@@ -1,0 +1,2 @@
+SourceSystem,SourcePath,TargetSchema,TargetTable,LoadType,WatermarkColumn,IsActive
+BankTxn,bank_transactions,stg,Transactions_Raw,INCREMENTAL,Transaction_Date,1

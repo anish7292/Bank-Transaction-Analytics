@@ -1,0 +1,6 @@
+{
+  "factoryName": "adf-bank-dev",
+  "adlsUrl": "https://adlsbankdev.dfs.core.windows.net",
+  "sqlConnectionString": "Server=tcp:sql-bank-dev.database.windows.net,1433;Initial Catalog=sqldb-bank-analytics;Encrypt=True;",
+  "env": "dev"
+}

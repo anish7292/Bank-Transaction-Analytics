@@ -1,0 +1,10 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "factoryName": { "value": "adf-bank-dev" },
+    "adlsUrl": { "value": "https://adlsbankdev.dfs.core.windows.net" },
+    "sqlConnectionString": { "value": "Server=tcp:sql-bank-dev.database.windows.net,1433;Initial Catalog=sqldb-bank-analytics;Encrypt=True;" },
+    "env": { "value": "dev" }
+  }
+}

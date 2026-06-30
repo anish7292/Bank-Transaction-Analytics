@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "factoryName": { "type": "string" },
+    "adlsUrl": { "type": "string" },
+    "sqlConnectionString": { "type": "string" },
+    "env": { "type": "string", "defaultValue": "dev" }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DataFactory/factories",
+      "apiVersion": "2018-06-01",
+      "name": "[parameters('factoryName')]",
+      "location": "[resourceGroup().location]",
+      "identity": { "type": "SystemAssigned" },
+      "properties": {
+        "globalParameters": {
+          "gp_env": { "type": "string", "value": "[parameters('env')]" },
+          "gp_defaultLoadType": { "type": "string", "value": "INCREMENTAL" }
+        }
+      }
+    }
+  ]
+}

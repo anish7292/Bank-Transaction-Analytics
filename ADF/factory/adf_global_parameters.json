@@ -1,0 +1,10 @@
+{
+  "name": "adf_global_parameters",
+  "properties": {
+    "globalParameters": {
+      "gp_env": { "type": "string", "value": "dev" },
+      "gp_defaultLoadType": { "type": "string", "value": "INCREMENTAL" },
+      "gp_alertWebhookUrl": { "type": "string", "value": "https://example-webhook.local/notify" }
+    }
+  }
+}

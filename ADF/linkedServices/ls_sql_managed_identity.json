@@ -1,0 +1,14 @@
+{
+  "name": "ls_sql_managed_identity",
+  "properties": {
+    "type": "AzureSqlDatabase",
+    "typeProperties": {
+      "connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:<sql_server>.database.windows.net,1433;Initial Catalog=<sql_db>"
+    },
+    "connectVia": {
+      "referenceName": "AutoResolveIntegrationRuntime",
+      "type": "IntegrationRuntimeReference"
+    },
+    "annotations": ["UseADFManagedIdentity"]
+  }
+}
