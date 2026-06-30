@@ -1,0 +1,7 @@
+{
+  "name": "Banking Dark Theme",
+  "dataColors": ["#00B3A4", "#1E88E5", "#FFC107", "#EF5350", "#AB47BC", "#66BB6A"],
+  "background": "#0F172A",
+  "foreground": "#E2E8F0",
+  "tableAccent": "#00B3A4"
+}
